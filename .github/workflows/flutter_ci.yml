@@ -11,6 +11,7 @@ on:
 jobs:
   # Define a job for testing and analyzing the code
   test_and_analyze:
+    name: Test and Analyze
     # The runner environment the job will execute on (Linux is common for Flutter CI)
     runs-on: ubuntu-latest
 
@@ -39,7 +40,7 @@ jobs:
       run: flutter test
 
   build_apk:
-    name: Build Android APK
+    name: Build and Sign Android APK
     runs-on: ubuntu-latest
     # This job will only run if the 'test_and_analyze' job succeeds
     needs: test_and_analyze
@@ -52,6 +53,21 @@ jobs:
 
       - name: Get Dependencies
         run: flutter pub get
+
+      - name: Setup Keystore and Properties
+        id: keystore
+        run: |
+          # 1. Decode the Base64-encoded keystore file and save it
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release-key.jks
+          
+          # 2. Create the key.properties file using environment variables (Secrets)
+          echo "storeFile=release-key.jks" >> android/key.properties
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          
+          # Move key.properties to the android/ directory for consistency
+          mv android/key.properties android/key.properties
 
       - name: Build Release APK
         # Use 'flutter build apk --release' to generate the production-ready APK

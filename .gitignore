@@ -2,6 +2,9 @@
 .env
 .env.*
 
+# Android Keystore and Credentials	
+my-upload-key.jks.base64
+
 # Miscellaneous
 *.class
 *.log
