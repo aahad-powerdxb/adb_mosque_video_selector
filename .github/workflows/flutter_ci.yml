@@ -1,0 +1,65 @@
+name: Flutter CI
+
+on:
+  push:
+    # Triggers the workflow on pushes to the 'main' branch
+    branches: [ main ]
+  pull_request:
+    # Triggers the workflow on pull requests to the 'main' branch
+    branches: [ main ]
+
+jobs:
+  # Define a job for testing and analyzing the code
+  test_and_analyze:
+    # The runner environment the job will execute on (Linux is common for Flutter CI)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      # A standard action to check out your repository code
+      uses: actions/checkout@v4
+
+    - name: Set up Flutter
+      # A community action to install and set up the Flutter SDK
+      uses: subosito/flutter-action@v2
+      with:
+        # Specify the version or channel (e.g., 'stable', '3.16.x')
+        channel: 'stable' 
+
+    - name: Get Dependencies
+      # Runs 'flutter pub get' to fetch all packages
+      run: flutter pub get
+
+    - name: Run Flutter Analyze
+      # Performs static analysis to catch common errors and warnings
+      run: flutter analyze
+
+    - name: Run Tests
+      # Executes all unit and widget tests
+      run: flutter test
+
+  build_apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    # This job will only run if the 'test_and_analyze' job succeeds
+    needs: test_and_analyze
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Build Release APK
+        # Use 'flutter build apk --release' to generate the production-ready APK
+        run: flutter build apk --release
+
+      - name: Upload APK Artifact
+        # This step saves the built file so you can download it from the GitHub Actions page
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
