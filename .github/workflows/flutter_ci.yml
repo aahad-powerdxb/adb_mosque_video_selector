@@ -67,7 +67,7 @@ jobs:
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
           
           # Move key.properties to the android/ directory for consistency
-          mv android/key.properties android/key.properties
+          # mv android/key.properties android/key.properties
 
       - name: Build Release APK
         # Use 'flutter build apk --release' to generate the production-ready APK
